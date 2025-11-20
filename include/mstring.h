@@ -39,7 +39,9 @@ int mstring_size(mstring ms);
 int mstring_capacity(mstring ms);
 
 void mstring_realloc(mstring* ms, int bytes);
+
 void mstring_append(mstring*, mstring);
+void mstring_resize(mstring*, int);
 
 
 #ifdef MSTRING_IMPLEMENTATION
@@ -168,13 +170,13 @@ void mstring_realloc(mstring* ms, const int bytes)
     *ms = nms;
 }
 
-void mstring_append(mstring* to, mstring from) {
+void mstring_append(mstring* to, mstring from)
+{
     if (!to || !(*to) || !from) return;
 
     int old_size = (*to)->size;
     mstring_realloc(to, MSTRING_stc(old_size + from->size));
 
-    // Check if realloc succeeded
     if ((*to)->capacity < MSTRING_stc(old_size + from->size)) return;
 
     (*to)->size = old_size + from->size;
@@ -182,7 +184,17 @@ void mstring_append(mstring* to, mstring from) {
     (*to)->data[(*to)->size] = '\0';
 }
 
+void mstring_resize(mstring* ms, const int new_size)
+{
+    if (!ms || !(*ms)) return;
 
+    mstring_realloc(ms, MSTRING_stc(new_size));
+    if ((*ms)->capacity < MSTRING_stc(new_size)) return;
+
+    for (int i = (*ms)->size; i < (*ms)->capacity; i++) (*ms)->data[i] = 0;
+    (*ms)->size = new_size;
+    for (int i = (*ms)->size; i < (*ms)->capacity; i++) (*ms)->data[i] = 0;
+}
 
 
 #endif
