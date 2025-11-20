@@ -11,22 +11,11 @@
 
 
 
-void print_s(const string_t s)
-{
-    printf("{\n");
-    printf("    .data= [");
-    string_output_ca(0, s.data, s.capacity, ", ", 1);
-    printf("]\n");
-    printf("    .size= %d\n",s.size);
-    printf("    .capacity= %d\n",s.capacity);
-    printf("}\n");
-}
-
 int main(void)
 {
     string_t s = string_new(1);
     s.data[0] = '\t';
-    print_s(s);
+    string_output_pretty(0, s, 1);
     string_delete(&s);
     return 0;
 }

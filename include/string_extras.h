@@ -22,7 +22,7 @@
 // output character array
 // ------------------------------------
 void string_output_ca(
-    const FILE* stream, // file to output to -> stdin (can be null)
+    FILE* stream,       // file to output to -> stdin (can be null)
     const char* ca,     // char array
     int size,           // char array size
     const char* c,      // spacing string -> ", " / " " (can be null)
@@ -30,7 +30,7 @@ void string_output_ca(
     );
 
 void string_output_pretty(
-    const FILE* stream, // file to output to -> stdin (can be null)
+    FILE* stream,       // file to output to -> stdin (can be null)
     string_t s,         // string to output
     int as_char         // as char or as int -> ['h', 'e', 'l', 'l', 'o'] /
     );
@@ -41,7 +41,7 @@ void string_output_pretty(
 // string extras implementations
 //////////////////////////////////////
 
-void string_output_ca(const FILE* stream, const char* ca, const int size, const char* c, const int as_char)
+void string_output_ca(FILE* stream, const char* ca, const int size, const char* c, const int as_char)
 {
     if (stream == NULL) stream = stdout;
     if (c == NULL) c = ", ";
@@ -64,9 +64,16 @@ void string_output_ca(const FILE* stream, const char* ca, const int size, const 
     }
 }
 
-void string_output_pretty(const FILE* stream, string_t s, const int as_char)
+void string_output_pretty(FILE* stream, const string_t s, const int as_char)
 {
     if (stream == NULL) stream = stdout;
+    printf("{\n");
+    printf("    .data= [");
+    string_output_ca(stream, s.data, s.capacity, ", ", 1);
+    printf("]\n");
+    printf("    .size= %d\n",s.size);
+    printf("    .capacity= %d\n",s.capacity);
+    printf("}\n");
 }
 
 #endif
