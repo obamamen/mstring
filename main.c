@@ -5,9 +5,13 @@
 
 int main(void)
 {
-    mstring s = mstring_new_from("Hello, World!");
-    mstring_output_pretty(0,s,1);
-    mstring_delete(&s);
-    mstring_output_pretty(0,s,1);
+    mstring a = mstring_new_from_cstring(
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    mstring_output_pretty(0,a);
+    mstring b = mstring_new_from_cstring(
+        "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+    mstring_output_pretty(0,b);
+    mstring_append(&a, b);
+    mstring_output_pretty(0,a);
     return 0;
 }

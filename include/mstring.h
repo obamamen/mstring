@@ -1,6 +1,6 @@
 /* ================================== *\
  @file     mstring.h
- @project  string
+ @project  mstring
  @author   moosm
  @date     11/20/2025
 *\ ================================== */
@@ -8,11 +8,11 @@
 #ifndef MSTRING_MSTRING_H
 #define MSTRING_MSTRING_H
 //////////////////////////////////////
-// string declaration
+// mstring declaration
 //////////////////////////////////////
 
 // ------------------------------------
-// string struct
+// mstring struct
 // ------------------------------------
 typedef
 struct internal_mstring
@@ -28,19 +28,23 @@ mstring mstring_alloc(int bytes);
 mstring mstring_new_null();
 mstring mstring_new_empty();
 mstring mstring_new(int size);
-mstring mstring_new_from(const char* s);
+mstring mstring_new_from_cstring(const char* cs);
+mstring mstring_new_from(mstring);
+mstring mstring_steal(mstring*);
+
 void mstring_delete(mstring* ms);
 
 const char* mstring_get(mstring ms);
 int mstring_size(mstring ms);
 int mstring_capacity(mstring ms);
 
-extern const char NULL_MSTRING[];
+void mstring_realloc(mstring* ms, int bytes);
+void mstring_append(mstring*, mstring);
 
 
 #ifdef MSTRING_IMPLEMENTATION
 //////////////////////////////////////
-// string implementations
+// mstring implementations
 //////////////////////////////////////
 
 typedef
@@ -67,8 +71,6 @@ internal_mstring_t;
 
 // --------- size to capacity ---------
 #define MSTRING_stc(size) (size+1)
-
-const char NULL_STRING[] = "[null]";
 
 mstring mstring_alloc(const int bytes)
 {
@@ -98,17 +100,34 @@ mstring mstring_new_empty()
     return mstring_new(0);
 }
 
-mstring mstring_new_from(const char* s)
+mstring mstring_new_from_cstring(const char* cs)
 {
-    if (!s) return mstring_new_null();
+    if (!cs) return mstring_new_null();
 
     int size = 0;
-    const char* p = s;
+    const char* p = cs;
     while ((*p++) != '\0') size++;
 
     mstring ms = mstring_new(size);
-    for (int i = 0; i < size; i++) ms->data[i] = s[i];
+    for (int i = 0; i < size; i++) ms->data[i] = cs[i];
 
+    return ms;
+}
+
+mstring mstring_new_from(mstring ms)
+{
+    if (!ms) return mstring_new_null();
+
+    mstring rms = mstring_new(ms->size);
+    for (int i = 0; i < mstring_size(ms); i++) rms->data[i] = ms->data[i];
+    return rms;
+}
+
+mstring mstring_steal(mstring* other)
+{
+    if (!other) return mstring_new_null();
+    mstring ms = (*other);
+    (*other) = 0;
     return ms;
 }
 
@@ -137,6 +156,33 @@ int mstring_capacity(mstring ms)
 {
     return (ms != 0) ? ms->capacity : 0;
 }
+
+void mstring_realloc(mstring* ms, const int bytes)
+{
+    if (!ms || !(*ms)) return;
+
+    mstring nms = (mstring) MSTRING_REALLOC(*ms, sizeof(struct internal_mstring) + bytes);
+    if (nms == 0) return;
+
+    nms->capacity = bytes;
+    *ms = nms;
+}
+
+void mstring_append(mstring* to, mstring from) {
+    if (!to || !(*to) || !from) return;
+
+    int old_size = (*to)->size;
+    mstring_realloc(to, MSTRING_stc(old_size + from->size));
+
+    // Check if realloc succeeded
+    if ((*to)->capacity < MSTRING_stc(old_size + from->size)) return;
+
+    (*to)->size = old_size + from->size;
+    for (int i = 0; i < from->size; i++) { (*to)->data[old_size+i] = from->data[i]; }
+    (*to)->data[(*to)->size] = '\0';
+}
+
+
 
 
 #endif
