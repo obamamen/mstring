@@ -16,12 +16,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "string.h"
+#include "mstring.h"
 
 // ------------------------------------
 // output character array
 // ------------------------------------
-void string_output_ca(
+void mstring_output_ca(
     FILE* stream,       // file to output to -> stdin (can be null)
     const char* ca,     // char array
     int size,           // char array size
@@ -29,19 +29,21 @@ void string_output_ca(
     int as_char         // as char or as int -> ['h', 'e', 'l', 'l', 'o'] /
     );
 
-void string_output_pretty(
+// ------------------------------------
+// pretty print output
+// ------------------------------------
+void mstring_output_pretty(
     FILE* stream,       // file to output to -> stdin (can be null)
-    string_t s,         // string to output
+    mstring s,          // mstring to output
     int as_char         // as char or as int -> ['h', 'e', 'l', 'l', 'o'] /
     );
 
-
-#ifdef STRING_EXTRAS_IMPLEMENTATION
+#ifdef MSTRING_EXTRAS_IMPLEMENTATION
 //////////////////////////////////////
 // string extras implementations
 //////////////////////////////////////
 
-void string_output_ca(FILE* stream, const char* ca, const int size, const char* c, const int as_char)
+void mstring_output_ca(FILE* stream, const char* ca, const int size, const char* c, const int as_char)
 {
     if (stream == NULL) stream = stdout;
     if (c == NULL) c = ", ";
@@ -64,15 +66,21 @@ void string_output_ca(FILE* stream, const char* ca, const int size, const char* 
     }
 }
 
-void string_output_pretty(FILE* stream, const string_t s, const int as_char)
+void mstring_output_pretty(FILE* stream, mstring s, const int as_char)
 {
     if (stream == NULL) stream = stdout;
     printf("{\n");
-    printf("    .data= [");
-    string_output_ca(stream, s.data, s.capacity, ", ", 1);
-    printf("]\n");
-    printf("    .size= %d\n",s.size);
-    printf("    .capacity= %d\n",s.capacity);
+    if (s != NULL)
+    {
+        printf("    .data= [");
+        mstring_output_ca(stream, mstring_get(s), mstring_capacity(s), ", ", 1);
+        printf("]\n");
+        printf("    .size= %d\n",mstring_size(s));
+        printf("    .capacity= %d\n",mstring_capacity(s));
+    } else
+    {
+        printf("    [null]\n");
+    }
     printf("}\n");
 }
 
